@@ -43,7 +43,7 @@ class NumEqualToHandler(webapp2.RequestHandler):
         query = client.query(kind='Value')
         query.add_filter('value', '=', entity_value)
         entities = list(query.fetch())
-        self.response.write(entities.count())
+        self.response.write(len(entities))
 
 
 # class UndoHandler(webapp2.RequestHandler):
@@ -61,7 +61,7 @@ class EndHandler(webapp2.RequestHandler):
         for res in results:
             client.delete(res.key)
         check_results = list(query.fetch())
-        if check_results.count() == 0:
+        if len(check_results) == 0:
             self.response.write('CLEANED')
         else:
             self.response.write('Something went wrong')
