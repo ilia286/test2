@@ -15,6 +15,7 @@ class GetHandler(webapp2.RequestHandler):
         self.response.write(entity_value)
 
 
+
 class SetHandler(webapp2.RequestHandler):
     def get(self):
         entity_name = self.request.get('name').strip()
@@ -31,10 +32,16 @@ class SetHandler(webapp2.RequestHandler):
 
 
 class UnsetHandler(webapp2.RequestHandler):
-    # TODO
     def get(self):
         entity_name = self.request.get('name').strip()
-        client.delete(entity_name)
+        key = client.key('Value', entity_name)
+        entity_to_update = datastore.Entity(key=key)
+        entity_to_update.update({
+            'name': entity_name
+        })
+        client.put(entity_to_update)
+        res = client.get(key)
+        self.response.write(res)
 
 
 class NumEqualToHandler(webapp2.RequestHandler):
