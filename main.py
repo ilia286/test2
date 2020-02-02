@@ -4,6 +4,29 @@ from google.cloud import datastore
 client = datastore.Client()
 
 
+class ValueNode:
+    def __init__(self, name=None, value=None, prev=None, next=None):
+        self.name = name
+        self.value = value
+        self.prev = prev
+        self.next = next
+
+    def __repr__(self):
+        return repr(self.name), repr(self.value)
+
+
+class ValueNodeList:
+    def __init__(self):
+        self.head = None
+
+    # Adding from head  - to handle case that all of operations must be O(1) TC
+    def add_to_head(self, name, value):
+        possible_head = ValueNode(name=name, value=value, next=self.head)
+        if self.head:
+            self.head.prev = possible_head
+        self.head = possible_head
+
+
 # entity_name = self.request.get('name').strip()
 # entity_value = self.request.get('value').strip()
 #    strip() is used to handle wrong user input
@@ -13,7 +36,6 @@ class GetHandler(webapp2.RequestHandler):
         name = self.request.get('name').strip()
         entity_value = client.get(name)
         self.response.write(entity_value)
-
 
 
 class SetHandler(webapp2.RequestHandler):
@@ -37,7 +59,8 @@ class UnsetHandler(webapp2.RequestHandler):
         key = client.key('Value', entity_name)
         entity_to_update = datastore.Entity(key=key)
         entity_to_update.update({
-            'name': entity_name
+            'name': entity_name,
+            'value': None
         })
         client.put(entity_to_update)
         res = client.get(key)
@@ -79,7 +102,7 @@ app = webapp2.WSGIApplication([ \
     ('/set', SetHandler),
     ('/unset', UnsetHandler),
     ('/numequalto', NumEqualToHandler),
-    ('/undo', UndoHandler),
-    ('/redo', RedoHandler),
+    # ('/undo', UndoHandler),
+    # ('/redo', RedoHandler),
     ('/end', EndHandler),
-], debug=False)
+], debug=True)
