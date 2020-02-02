@@ -5,11 +5,11 @@ client = datastore.Client()
 
 
 class ValueNode:
-    def __init__(self, name=None, value=None, prev=None, next=None):
+    def __init__(self, name=None, value=None, prev=None, nexxt=None):
         self.name = name
         self.value = value
         self.prev = prev
-        self.next = next
+        self.nexxt = nexxt
 
     def __repr__(self):
         return repr(self.name), repr(self.value)
@@ -21,7 +21,7 @@ class ValueNodeList:
 
     # Adding from head  - to handle case that all of operations must be O(1) TC
     def add_to_head(self, name, value):
-        possible_head = ValueNode(name=name, value=value, next=self.head)
+        possible_head = ValueNode(name=name, value=value, nexxt=self.head)
         if self.head:
             self.head.prev = possible_head
         self.head = possible_head
@@ -30,6 +30,9 @@ class ValueNodeList:
 # entity_name = self.request.get('name').strip()
 # entity_value = self.request.get('value').strip()
 #    strip() is used to handle wrong user input
+
+lst = ValueNodeList()  # type: ValueNodeList
+
 
 class GetHandler(webapp2.RequestHandler):
     def get(self):
@@ -41,7 +44,7 @@ class GetHandler(webapp2.RequestHandler):
 class SetHandler(webapp2.RequestHandler):
     def get(self):
         entity_name = self.request.get('name').strip()
-        entity_value = self.request.get('value').strip()
+        entity_value = self.request.get('value').strip()  # type: str
         key = client.key('Value', entity_name)
         entity_to_store = datastore.Entity(key=key)
         entity_to_store.update({
@@ -50,6 +53,7 @@ class SetHandler(webapp2.RequestHandler):
         })
         client.put(entity_to_store)
         res = client.get(key)
+        lst.add_to_head(entity_name, entity_value)
         self.response.write(res)
 
 
@@ -64,6 +68,7 @@ class UnsetHandler(webapp2.RequestHandler):
         })
         client.put(entity_to_update)
         res = client.get(key)
+        lst.add_to_head(entity_name, None)
         self.response.write(res)
 
 
@@ -97,7 +102,7 @@ class EndHandler(webapp2.RequestHandler):
             self.response.write('Something went wrong')
 
 
-app = webapp2.WSGIApplication([ \
+app = webapp2.WSGIApplication([
     ('/get', GetHandler),
     ('/set', SetHandler),
     ('/unset', UnsetHandler),
