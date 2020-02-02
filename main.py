@@ -4,12 +4,9 @@ from google.cloud import datastore
 client = datastore.Client()
 
 
-# class Variable(ndb.Model):
-#     name = ndb.StringProperty
-#     value = ndb.StringProperty
-#     time = ndb.DateTimeProperty\
-#         # (auto_now_add=True)
-
+# entity_name = self.request.get('name').strip()
+# entity_value = self.request.get('value').strip()
+#    strip() is used to handle wrong user input
 
 class GetHandler(webapp2.RequestHandler):
     def get(self):
@@ -55,10 +52,19 @@ class NumEqualToHandler(webapp2.RequestHandler):
 #
 # class RedoHandler(webapp2.RequestHandler):
 #     def redo(self):
-#
-#
-# class EndHandler(webapp2.RequestHandler):
-#     def end(self):
+
+
+class EndHandler(webapp2.RequestHandler):
+    def get(self):
+        query = client.query(kind='Value')
+        results = query.fetch()
+        for res in results:
+            client.delete(res.key)
+        check_results = list(query.fetch())
+        if check_results.count() == 0:
+            self.response.write('CLEANED')
+        else:
+            self.response.write('Something went wrong')
 
 
 app = webapp2.WSGIApplication([ \
