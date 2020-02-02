@@ -32,6 +32,7 @@ class ValueNodeList:
 #    strip() is used to handle wrong user input
 
 lst = ValueNodeList()  # type: ValueNodeList
+pointer = None
 
 
 class GetHandler(webapp2.RequestHandler):
@@ -81,12 +82,26 @@ class NumEqualToHandler(webapp2.RequestHandler):
         self.response.write(len(entities))
 
 
-# class UndoHandler(webapp2.RequestHandler):
-#     def undo(self):
-#
-#
-# class RedoHandler(webapp2.RequestHandler):
-#     def redo(self):
+class UndoHandler(webapp2.RequestHandler):
+    def get(self):
+        global pointer
+        curr = pointer.nexxt
+        if curr:
+            pointer = curr
+            self.response.write(pointer.name + ' ' + pointer.value)
+        else:
+            self.response.write('NO COMMANDS')
+
+
+class RedoHandler(webapp2.RequestHandler):
+    def redo(self):
+        global pointer
+        curr = pointer.prev
+        if curr:
+            pointer = curr
+            self.response.write(pointer.name + ' ' + pointer.value)
+        else:
+            self.response.write('NO COMMANDS')
 
 
 class EndHandler(webapp2.RequestHandler):
@@ -107,7 +122,7 @@ app = webapp2.WSGIApplication([
     ('/set', SetHandler),
     ('/unset', UnsetHandler),
     ('/numequalto', NumEqualToHandler),
-    # ('/undo', UndoHandler),
-    # ('/redo', RedoHandler),
+    ('/undo', UndoHandler),
+    ('/redo', RedoHandler),
     ('/end', EndHandler),
 ], debug=True)
